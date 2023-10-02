@@ -1,21 +1,54 @@
 package ru.raticate.portreader;
 
 import com.fazecast.jSerialComm.SerialPort;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import org.springframework.stereotype.Component;
+import java.io.*;
+import java.time.LocalDateTime;
 import java.util.*;
-
+@Component
 public class ComPortReader {
-    public static void main(String[] args) throws IOException {
-        Map<Integer, Set<String>> platform2product = new TreeMap<>(Comparator.naturalOrder());
+    File file = new File("history.txt");
+    FileWriter fileWriter;
+    ComPortReader(){
+        LocalDateTime localDateTime = LocalDateTime.now();
+        try {
+            fileWriter = new FileWriter(file,true);
+            fileWriter.write(localDateTime.toString()+'\n');
+        } catch (IOException e) {
+            System.err.println("Проблема записи файла истории");
+        }
 
+        if(!file.exists()) {
+            try {
+                 file.createNewFile();
+            } catch (IOException e) {
+                System.err.println("Проблема создания файла истории");
+            }
+        }
+    }
+    public void write(String content) {
+        try {
+            System.out.println(content);
+            fileWriter.write(content+'\n');
+            fileWriter.flush();
+        } catch (IOException e) {
+            System.err.println("Проблема записи файла истории");
+        }
+
+
+
+    }
+    public static void main(String[] args) {
+        new ComPortReader().read("1");
+    }
+
+    public void read(String com) {
+        Map<Long, Set<String>> platform2product = new TreeMap<>(Comparator.naturalOrder());
+      
         List<SerialPort> ports = new java.util.ArrayList<>(Arrays.stream(SerialPort.getCommPorts()).toList());
 
         if (ports.size() == 0) {
-            System.out.println("No COM ports available.");
+            write("No COM ports available.");
             return;
         }
 
@@ -23,42 +56,49 @@ public class ComPortReader {
             SerialPort serialPort = ports.get(i);
             if (!serialPort.openPort()) {
                 ports.remove(serialPort);
+
             }
         }
 
-
-        SerialPort port = ports.get(0);
+        SerialPort port = ports.get(Integer.parseInt(com));
         port.setComPortParameters(9600, 8, 1, SerialPort.NO_PARITY);
         port.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, Integer.MAX_VALUE, 0);
-        System.out.println("Отсканируйте пирамиду");
+
         BufferedReader bufferedReader = null;
-        int currentPlatform = -1;
+        long currentPlatform = -1;
         while (currentPlatform == -1 && port.openPort()) {
+            write("Отсканируйте пирамиду");
             InputStream inputStream = port.getInputStream();
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             bufferedReader = new BufferedReader(inputStreamReader);
-            int value = Integer.parseInt(bufferedReader.readLine());
+            int value = 0;
+            try {
+                value = Integer.parseInt(bufferedReader.readLine());
+            } catch (IOException e) {
+                write("Это не число");
+            }
             if (value < 100) {
                 currentPlatform = value;
-                System.out.println("Выбрана пирамида №" + currentPlatform);
+                write("Выбрана пирамида №" + currentPlatform);
             }
         }
 
         while (port.openPort()) {
             String strValue = null;
             try {
+                assert bufferedReader != null;
                 strValue = bufferedReader.readLine();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            int value = Integer.parseInt(strValue);
+            long value = Long.parseLong(strValue);
             if (value == 999) {
-                System.out.println(platform2product);
+                write(platform2product.toString());
                 break;
             }
             if (value < 100) {
                 currentPlatform = value;
-                System.out.println("Выбрана пирамида №" + currentPlatform);
+                write("Выбрана пирамида №" + currentPlatform);
             } else {
                 if (platform2product.containsKey(currentPlatform)) {
                     platform2product.get(currentPlatform).add(strValue);
@@ -68,11 +108,9 @@ public class ComPortReader {
                     set.add(strValue);
                     platform2product.put(currentPlatform, set);
                 }
-                System.out.println(strValue+": "+currentPlatform);
+                write(strValue+": "+currentPlatform);
             }
         }
         port.closePort();
-        System.out.println("Port closed.");
-
     }
 }

@@ -1,0 +1,13 @@
+com : 1
+spring:
+  datasource:
+    url : jdbc:firebirdsql://192.168.1.93:3050/C:\Recovery\Base30082023.fdb
+    password: masterkey
+    username: SYSDBA
+  main:
+    allow-bean-definition-overriding : true
+    banner-mode: off
+
+logging:
+  level:
+    root: off
