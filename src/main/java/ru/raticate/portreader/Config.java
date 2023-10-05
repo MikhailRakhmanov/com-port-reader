@@ -13,7 +13,8 @@ public class Config {
     @Bean
     ComPortReader comPortReader(){
         ComPortReader comPortReader = new ComPortReader();
-        comPortReader.read(com);
+//        comPortReader.read(com);
+        comPortReader.sendQuery(comPortReader.read(com));
         return comPortReader;
     }
 }
