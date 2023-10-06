@@ -1,101 +1,114 @@
 package ru.raticate.portreader;
 
 import com.fazecast.jSerialComm.SerialPort;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Component
 public class ComPortReader {
-    File file = new File("history.txt");
-    FileWriter fileWriter;
-    long date;
 
-    ComPortReader() {
+    private final Logger logger;
+    private final long date;
+    private final JdbcTemplate jdbcTemplate;
+
+    ComPortReader(JdbcTemplate jdbcTemplate, Logger logger) {
+        this.jdbcTemplate = jdbcTemplate;
+        this.logger = logger;
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime then = LocalDateTime.of(1900, Month.JANUARY, 1, 0, 0,0,0);
+        LocalDateTime then = LocalDateTime.of(1900, Month.JANUARY, 1, 0, 0, 0, 0);
         Duration duration = Duration.between(then, now);
-        date = duration.toDays();
-        System.out.println(date);
-        try {
-            fileWriter = new FileWriter(file, true);
-            fileWriter.write(now.toString() + '\n');
-        } catch (IOException e) {
-            System.err.println("Проблема записи файла истории");
-        }
-
-        if (!file.exists()) {
-            try {
-                assert true:
-                file.createNewFile();
-            } catch (IOException e) {
-                System.err.println("Проблема создания файла истории");
-            }
-        }
+        date = duration.toDays() + 2;
     }
-
-    public void write(String content) {
-        try {
-            System.out.println(content);
-            fileWriter.write(content + '\n');
-            fileWriter.flush();
-        } catch (IOException e) {
-            System.err.println("Проблема записи файла истории");
-        }
-
-
-    }
-
 
 
     public void sendQuery(Map<Integer, Set<Integer>> platform2product) {
-        StringBuilder firstQuery = new StringBuilder("update DOGOVOR set SOSDOG = 4 where IDDOGOVOR in [");
-        StringJoiner joiner = new StringJoiner(", ");
+
+        Map<Integer, Integer> idListHaff2idDog = new TreeMap<>();
+        StringBuilder updateStateOfDog = new StringBuilder("update DOGOVOR set SOSDOG = 4 where IDDOGOVOR in (");
+        StringJoiner listHaffIds = new StringJoiner(", ");
+
         platform2product.forEach((key, value) -> {
             for (Integer integer : value) {
-                joiner.add(integer.toString());
+                listHaffIds.add(integer.toString());
             }
         });
-        firstQuery.append(joiner);
-        firstQuery.append("];");
-        System.out.println(firstQuery);
+        logger.log("select a.IDLISTHAFF, c.IDDOGOVOR from LISTHAFF a join LISTIZD b on a.idizd = b.id join DOGOVOR c on b.iddog = c.iddogovor where a.IDLISTHAFF in (" + listHaffIds + ")");
+        jdbcTemplate.query(
+                "select a.IDLISTHAFF, c.IDDOGOVOR from LISTHAFF a join LISTIZD b on a.idizd = b.id join DOGOVOR c on b.iddog = c.iddogovor where a.IDLISTHAFF in (" + listHaffIds + ")", rs -> {
+                    idListHaff2idDog.put(rs.getInt(1), rs.getInt(2));
+                });
 
-        String secondQuery = "update LISTHAFF set DOTINSKLPOV = " + date + " where IDLISTHAFF in [" + joiner +
-                "];";
-        System.out.println(secondQuery);
 
-        StringBuilder fourQuery = new StringBuilder();
+        StringJoiner dogovorIds = new StringJoiner(", ");
+
+        platform2product.forEach((key, value) -> {
+            for (Integer integer : value) {
+                try {
+
+                    dogovorIds.add(idListHaff2idDog.get(integer).toString());
+
+                } catch (Exception e) {
+                    logger.log(e.getMessage());
+                }
+            }
+        });
+
+        updateStateOfDog.append(dogovorIds);
+        updateStateOfDog.append(");");
+        logger.log(String.valueOf(updateStateOfDog));
+        jdbcTemplate.execute(String.valueOf(updateStateOfDog));
+
+        String secondQuery = "update LISTHAFF set DOTINSKLPOV = " + date + " where IDLISTHAFF in (" + listHaffIds + ");";
+        logger.log(secondQuery);
+        jdbcTemplate.execute(secondQuery);
+
+
+        AtomicReference<StringBuilder> fourQuery = new AtomicReference<>(new StringBuilder());
 
         AtomicReference<StringJoiner> joiner2 = new AtomicReference<>(new StringJoiner(", "));
         platform2product.keySet().forEach(key -> {
+            fourQuery.set(new StringBuilder());
             joiner2.set(new StringJoiner(", "));
-            for (Integer id: platform2product.get(key)){
+            for (Integer id : platform2product.get(key)) {
                 joiner2.get().add(id.toString());
             }
-            fourQuery.append("update LISTHAFF set ncar = ").append(key).append(" where IDLISTHAFF in [").append(joiner2).append("];\n");
+
+            fourQuery.get().append("update LISTHAFF set ncar = ").append(key).append(" where IDLISTHAFF in (").append(joiner2).append(");");
+            logger.log(String.valueOf(fourQuery));
+            jdbcTemplate.execute(String.valueOf(fourQuery));
+
         });
-        System.out.print(fourQuery);
 
 
-        String journalQuery ="insert into TBL_OPER(IDUSER,IDDOG,DT,OPER) values ";
-        StringJoiner joiner3 = new StringJoiner(", ");
-        platform2product.values().forEach(e->e.forEach(s-> joiner3.add("(0, ".concat(String.valueOf(s)).concat(", ").concat(String.valueOf(date)).concat(", 9)"))));
-        journalQuery= journalQuery.concat(joiner3.toString()).concat(";");
-        System.out.println(journalQuery);
+        platform2product.values().forEach(e -> e.forEach(s -> {
+            try {
+                logger.log("insert into TBL_OPER(IDUSER,IDDOG,DT,OPER) values (0, ".concat(String.valueOf(idListHaff2idDog.get(s))).concat(", ").concat(String.valueOf(date)).concat(", 9);"));
+                jdbcTemplate.execute("insert into TBL_OPER(IDUSER,IDDOG,DT,OPER) values (0, ".concat(String.valueOf(idListHaff2idDog.get(s))).concat(", ").concat(String.valueOf(date)).concat(", 9);"));
+            } catch (Exception ex) {
+                logger.log(ex.getMessage());
+            }
+        }));
+
+
     }
 
     public Map<Integer, Set<Integer>> read(String com) {
         Map<Integer, Set<Integer>> platform2product = new TreeMap<>(Comparator.naturalOrder());
 
-        List<SerialPort> ports = new java.util.ArrayList<>(Arrays.stream(SerialPort.getCommPorts()).toList());
+        List<SerialPort> ports = new ArrayList<>(Arrays.stream(SerialPort.getCommPorts()).toList());
 
         if (ports.size() == 0) {
-            write("No COM ports available.");
+            logger.log("No COM ports available.");
             return platform2product;
         }
 
@@ -116,7 +129,7 @@ public class ComPortReader {
         String value;
         int numValue = 0;
         while (currentPlatform == -1 && port.openPort()) {
-            write("Отсканируйте пирамиду");
+            System.out.println("Отсканируйте пирамиду");
 
             bufferedReader = new BufferedReader(new InputStreamReader(port.getInputStream()));
 
@@ -127,25 +140,31 @@ public class ComPortReader {
                 }
                 numValue = Integer.parseInt(value);
             } catch (Exception e) {
-                write("Это не 9-тизначное число");
+                System.out.println("Это не 9-тизначное число");
             }
 
             if (100000000 < numValue && numValue < 100000100) {
                 currentPlatform = numValue % 100;
-                write("Выбрана пирамида №" + currentPlatform);
+                System.out.println("Выбрана пирамида №" + currentPlatform);
+                logger.log("Выбрана пирамида №" + currentPlatform);
             }
         }
         while (port.openPort()) {
-
+            value = "999";
             try {
                 assert bufferedReader != null;
                 value = bufferedReader.readLine();
 
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                logger.log("Ошибка чтения файла");
             }
             if (value.equals("999")) {
-                write(platform2product.toString());
+                logger.log("Пирамида -> изделие: " + platform2product.toString());
+                AtomicInteger sum = new AtomicInteger();
+                platform2product.values().forEach(e->e.forEach(o->{
+                    sum.getAndIncrement();
+                }));
+                System.out.println("Отсканированно: " + sum.get() + " изделий.");
                 break;
             }
             if (value.length() != 9) {
@@ -157,22 +176,23 @@ public class ComPortReader {
                 numValue = Integer.parseInt(value);
 
             } catch (Exception e) {
-                write("code error");
+                logger.log("code error");
             }
 
             if (100000000 < numValue && numValue < 100000100) {
                 currentPlatform = numValue % 100;
-                write("Выбрана пирамида №" + currentPlatform);
+                logger.log("Выбрана пирамида №" + currentPlatform);
+                System.out.println("Выбрана пирамида №" + currentPlatform);
             } else {
                 final Integer[] platformToRemove = {null};
-                int num = numValue/1000;
+                int num = numValue / 1000;
                 platform2product.forEach((key, value1) -> {
                     value1.remove(num);
                     if (value1.isEmpty()) {
                         platformToRemove[0] = key;
                     }
                 });
-                if (platformToRemove[0] !=null){
+                if (platformToRemove[0] != null) {
                     platform2product.remove(platformToRemove[0]);
                 }
                 if (platform2product.containsKey(currentPlatform)) {
@@ -182,7 +202,8 @@ public class ComPortReader {
                     set.add(numValue / 1000);
                     platform2product.put(currentPlatform, set);
                 }
-                write(value + ": " + currentPlatform);
+                logger.log(value + ": " + currentPlatform);
+                System.out.println(value + ": " + currentPlatform);
             }
 
         }
