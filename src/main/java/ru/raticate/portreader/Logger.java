@@ -12,13 +12,11 @@ public class Logger {
 
     public Logger() {
         File file = new File("history.txt");
-        if (!file.exists()) {
-            try {
-                assert true :
-                        file.createNewFile();
-            } catch (IOException e) {
-                System.err.println("Проблема создания файла истории");
-            }
+        if (!file.exists()) try {
+            assert true :
+                    file.createNewFile();
+        } catch (IOException e) {
+            System.err.println("Проблема создания файла истории");
         }
         try {
             fileWriter = new FileWriter(file, true);

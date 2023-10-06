@@ -159,11 +159,9 @@ public class ComPortReader {
                 logger.log("Ошибка чтения файла");
             }
             if (value.equals("999")) {
-                logger.log("Пирамида -> изделие: " + platform2product.toString());
+                logger.log("Пирамида -> изделие: " + platform2product);
                 AtomicInteger sum = new AtomicInteger();
-                platform2product.values().forEach(e->e.forEach(o->{
-                    sum.getAndIncrement();
-                }));
+                platform2product.values().forEach(e->e.forEach(o-> sum.getAndIncrement()));
                 System.out.println("Отсканированно: " + sum.get() + " изделий.");
                 break;
             }
