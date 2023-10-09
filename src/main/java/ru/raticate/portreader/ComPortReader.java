@@ -42,36 +42,39 @@ public class ComPortReader {
                 listHaffIds.add(integer.toString());
             }
         });
-        logger.log("select a.IDLISTHAFF, c.IDDOGOVOR from LISTHAFF a join LISTIZD b on a.idizd = b.id join DOGOVOR c on b.iddog = c.iddogovor where a.IDLISTHAFF in (" + listHaffIds + ")");
-        jdbcTemplate.query(
-                "select a.IDLISTHAFF, c.IDDOGOVOR from LISTHAFF a join LISTIZD b on a.idizd = b.id join DOGOVOR c on b.iddog = c.iddogovor where a.IDLISTHAFF in (" + listHaffIds + ")", rs -> {
-                    idListHaff2idDog.put(rs.getInt(1), rs.getInt(2));
-                });
+        if (listHaffIds.length() != 0) {
+            logger.log("select a.IDLISTHAFF, c.IDDOGOVOR from LISTHAFF a join LISTIZD b on a.idizd = b.id join DOGOVOR c on b.iddog = c.iddogovor where a.IDLISTHAFF in (" + listHaffIds + ")");
+            jdbcTemplate.query(
+                    "select a.IDLISTHAFF, c.IDDOGOVOR from LISTHAFF a join LISTIZD b on a.idizd = b.id join DOGOVOR c on b.iddog = c.iddogovor where a.IDLISTHAFF in (" + listHaffIds + ")", rs -> {
+                        idListHaff2idDog.put(rs.getInt(1), rs.getInt(2));
+                    });
 
-
+        }
         StringJoiner dogovorIds = new StringJoiner(", ");
 
         platform2product.forEach((key, value) -> {
             for (Integer integer : value) {
                 try {
-
-                    dogovorIds.add(idListHaff2idDog.get(integer).toString());
+                    var currentValue = idListHaff2idDog.get(integer);
+                    if (currentValue != null)
+                        dogovorIds.add(currentValue.toString());
 
                 } catch (Exception e) {
                     logger.log(e.getMessage());
                 }
             }
         });
-
-        updateStateOfDog.append(dogovorIds);
-        updateStateOfDog.append(");");
-        logger.log(String.valueOf(updateStateOfDog));
-        jdbcTemplate.execute(String.valueOf(updateStateOfDog));
-
-        String secondQuery = "update LISTHAFF set DOTINSKLPOV = " + date + " where IDLISTHAFF in (" + listHaffIds + ");";
-        logger.log(secondQuery);
-        jdbcTemplate.execute(secondQuery);
-
+        if (dogovorIds.length() != 0) {
+            updateStateOfDog.append(dogovorIds);
+            updateStateOfDog.append(");");
+            logger.log(String.valueOf(updateStateOfDog));
+            jdbcTemplate.execute(String.valueOf(updateStateOfDog));
+        }
+        if (listHaffIds.length() != 0) {
+            String secondQuery = "update LISTHAFF set DOTINSKLPOV = " + date + " where IDLISTHAFF in (" + listHaffIds + ");";
+            logger.log(secondQuery);
+            jdbcTemplate.execute(secondQuery);
+        }
 
         AtomicReference<StringBuilder> fourQuery = new AtomicReference<>(new StringBuilder());
 
@@ -82,18 +85,21 @@ public class ComPortReader {
             for (Integer id : platform2product.get(key)) {
                 joiner2.get().add(id.toString());
             }
-
-            fourQuery.get().append("update LISTHAFF set ncar = ").append(key).append(" where IDLISTHAFF in (").append(joiner2).append(");");
-            logger.log(String.valueOf(fourQuery));
-            jdbcTemplate.execute(String.valueOf(fourQuery));
-
+            if (joiner2.get().length() != 0) {
+                fourQuery.get().append("update LISTHAFF set ncar = ").append(key).append(" where IDLISTHAFF in (").append(joiner2).append(");");
+                logger.log(String.valueOf(fourQuery));
+                jdbcTemplate.execute(String.valueOf(fourQuery));
+            }
         });
 
 
         platform2product.values().forEach(e -> e.forEach(s -> {
             try {
-                logger.log("insert into TBL_OPER(IDUSER,IDDOG,DT,OPER) values (0, ".concat(String.valueOf(idListHaff2idDog.get(s))).concat(", ").concat(String.valueOf(date)).concat(", 9);"));
-                jdbcTemplate.execute("insert into TBL_OPER(IDUSER,IDDOG,DT,OPER) values (0, ".concat(String.valueOf(idListHaff2idDog.get(s))).concat(", ").concat(String.valueOf(date)).concat(", 9);"));
+                Integer dogId = idListHaff2idDog.get(s);
+                if (dogId != null) {
+                    logger.log("insert into TBL_OPER(IDUSER,IDDOG,DT,OPER) values (0, ".concat(String.valueOf(idListHaff2idDog.get(s))).concat(", ").concat(String.valueOf(date)).concat(", 9);"));
+                    jdbcTemplate.execute("insert into TBL_OPER(IDUSER,IDDOG,DT,OPER) values (0, ".concat(String.valueOf(idListHaff2idDog.get(s))).concat(", ").concat(String.valueOf(date)).concat(", 9);"));
+                }
             } catch (Exception ex) {
                 logger.log(ex.getMessage());
             }
@@ -107,7 +113,7 @@ public class ComPortReader {
 
         List<SerialPort> ports = new ArrayList<>(Arrays.stream(SerialPort.getCommPorts()).toList());
 
-        if (ports.size() == 0) {
+        if (ports.isEmpty()) {
             logger.log("No COM ports available.");
             return platform2product;
         }
@@ -161,7 +167,7 @@ public class ComPortReader {
             if (value.equals("999")) {
                 logger.log("Пирамида -> изделие: " + platform2product);
                 AtomicInteger sum = new AtomicInteger();
-                platform2product.values().forEach(e->e.forEach(o-> sum.getAndIncrement()));
+                platform2product.values().forEach(e -> e.forEach(o -> sum.getAndIncrement()));
                 System.out.println("Отсканированно: " + sum.get() + " изделий.");
                 break;
             }
