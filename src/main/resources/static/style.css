@@ -1,0 +1,26 @@
+* {
+    margin-bottom: 10px;
+    font-family: Arial, serif;
+    font-size: 24px;
+}
+
+.button {
+    display: flex;
+    justify-content: center;
+
+    height: 100vh;
+}
+
+button {
+    align-self: center;
+
+    height: 10vh;
+    width: 30vw;
+}
+
+.barcode {
+    position: fixed;
+    top: 25px;
+    right: 25px;
+    width: 15vw
+}

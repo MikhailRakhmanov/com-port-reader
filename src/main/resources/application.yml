@@ -1,13 +1,12 @@
 com : 1 #это порядковый номер из включенных портов
 spring:
   datasource:
-    url : jdbc:firebirdsql://192.168.1.93:3050/C:\Recovery\Base30082023.fdb
+    url : jdbc:firebirdsql://192.168.1.44:3050/C:\Database\Scanner_test_base.fdb
     password: masterkey
     username: SYSDBA
   main:
     allow-bean-definition-overriding : true
     banner-mode: off
-
 logging:
   level:
     root: off
