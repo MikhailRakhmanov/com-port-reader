@@ -7,13 +7,15 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
     <link rel="stylesheet" href="/style.css">
+    <link rel="icon" href="/favicon.ico">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 </head>
 <body>
 <div class="button">
     <button onclick="start()" class="start-button">Start scan</button>
 </div>
-<img src="https://barcode.tec-it.com/barcode.ashx?data=end&translate-esc=on" alt="" class="barcode">
+<img th:src="@{https://barcode.tec-it.com/barcode.ashx(data=${barcode}, translate-esc='on')}" alt="" class="barcode">
 <div class="content">
 
 </div>

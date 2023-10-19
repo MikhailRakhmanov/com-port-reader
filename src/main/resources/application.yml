@@ -1,4 +1,6 @@
-com : 1 #это порядковый номер из включенных портов
+reader:
+  com : 1
+  exit-barcode : quit
 spring:
   datasource:
     url : jdbc:firebirdsql://192.168.1.44:3050/C:\Database\Scanner_test_base.fdb

@@ -1,6 +1,7 @@
 package ru.raticate.portreader.Reader;
 
 import com.fazecast.jSerialComm.SerialPort;
+import org.springframework.beans.factory.annotation.Autowired;
 import ru.raticate.portreader.Loggers.Logger;
 import ru.raticate.portreader.Loggers.LoggerLevel;
 
@@ -14,6 +15,8 @@ public class ComPortReader {
 
 
     Integer com;
+    @Autowired
+    String exitBarcode;
     private final Logger logger;
 
 
@@ -73,7 +76,7 @@ public class ComPortReader {
             }
         }
         while (port.openPort()) {
-            value = "end";
+            value = exitBarcode;
             try {
                 assert bufferedReader != null;
                 value = bufferedReader.readLine();
@@ -81,7 +84,7 @@ public class ComPortReader {
             } catch (IOException e) {
                 logger.log("Ошибка чтения",LoggerLevel.Browser,LoggerLevel.File);
             }
-            if (value.equals("end")) {
+            if (value.equals(exitBarcode)) {
                 logger.log("Пирамида -> изделие: " + platform2product);
                 AtomicInteger sum = new AtomicInteger();
                 platform2product.values().forEach(e -> e.forEach(o -> sum.getAndIncrement()));

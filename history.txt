@@ -19,3 +19,42 @@ update LISTHAFF set ncar = 2 where IDLISTHAFF in (350399, 359651, 359652, 359653
 [345573, 358360]
 insert into TBL_OPER(IDUSER,IDDOG,DT,OPER) values (0, 345573, 45216, 9);
 insert into TBL_OPER(IDUSER,IDDOG,DT,OPER) values (0, 358360, 45216, 9);
+17.10.2023 13:43
+Выбрана пирамида №1
+Выбрана пирамида №2
+Неверный штрих :
+Выбрана пирамида №2
+359648000: 2
+359650000: 2
+17.10.2023 14:00
+Выбрана пирамида №1
+359647000: 1
+359649000: 1
+Отсканированно: 2 изделий.
+select a.IDLISTHAFF, c.IDDOGOVOR from LISTHAFF a join LISTIZD b on a.idizd = b.id join DOGOVOR c on b.iddog = c.iddogovor where a.IDLISTHAFF in (359647, 359649)
+{359647=358360, 359649=358360}
+update LISTHAFF set DOTINSKLPOV = 45216 where IDLISTHAFF in (359647, 359649);
+update LISTHAFF set ncar = 1 where IDLISTHAFF in (359647, 359649);
+Договоры, где не проставлены все пирамиды: 
+[358360]
+insert into TBL_OPER(IDUSER,IDDOG,DT,OPER) values (0, 358360, 45216, 9);
+19.10.2023 08:36
+Выбрана пирамида №1
+359647000: 1
+359649000: 1
+359650000: 1
+359648000: 1
+359651000: 1
+359648000: 1
+359650000: 1
+Выбрана пирамида №2
+359653000: 2
+Отсканированно: 6 изделий.
+select a.IDLISTHAFF, c.IDDOGOVOR from LISTHAFF a join LISTIZD b on a.idizd = b.id join DOGOVOR c on b.iddog = c.iddogovor where a.IDLISTHAFF in (359647, 359648, 359649, 359650, 359651, 359653)
+{359647=358360, 359648=358360, 359649=358360, 359650=358360, 359651=358360, 359653=358360}
+update LISTHAFF set DOTINSKLPOV = 45218 where IDLISTHAFF in (359647, 359648, 359649, 359650, 359651, 359653);
+update LISTHAFF set ncar = 1 where IDLISTHAFF in (359647, 359648, 359649, 359650, 359651);
+update LISTHAFF set ncar = 2 where IDLISTHAFF in (359653);
+Договоры, где не проставлены все пирамиды: 
+[358360]
+insert into TBL_OPER(IDUSER,IDDOG,DT,OPER) values (0, 358360, 45218, 9);

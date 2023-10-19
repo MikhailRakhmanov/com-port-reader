@@ -10,8 +10,7 @@ $(document).ready(
                 }
                 $.ajax({
                     type: "GET",
-                    url: "http://".concat(ip).concat(":8080/data"),
-                    headers: {  'Access-Control-Allow-Origin': "http://".concat(ip).concat(":8080/data") },
+                    url: "/data",
                     success: function (data) {
                         console.log(data.length)
                         if (currentLength !== data.length) {
@@ -32,8 +31,7 @@ function start() {
     $(document).ready(function () {
         $.ajax({
             type: "POST",
-            url: "http://".concat(ip).concat(":8080/start"),
-            headers: {  'Access-Control-Allow-Origin': "http://".concat(ip).concat(":8080/start") },
+            url: "/start",
             data: ` `,
             success: function (result) {
             },

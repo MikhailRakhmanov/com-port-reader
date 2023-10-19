@@ -21,9 +21,16 @@ public class Config {
 
     }
 
-    @Value("${com}")
+    @Value("${reader.com}")
     Integer com;
 
+    @Value("${reader.exit-barcode}")
+    String exitBarcode;
+
+    @Bean
+    String exitBarcode(){
+        return exitBarcode;
+    }
     @Bean
     DatabaseWriter databaseWriter() {
         return new DatabaseWriter(logger(), jdbcTemplate);

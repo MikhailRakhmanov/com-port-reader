@@ -3,6 +3,10 @@ package ru.raticate.portreader.Loggers;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -27,6 +31,12 @@ public class Logger {
             fileWriter = new FileWriter(file, true);
             fileWriter.write(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) + System.lineSeparator());
         } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        try(final DatagramSocket socket = new DatagramSocket()){
+            socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
+            this.log(socket.getLocalAddress().getHostAddress()+":8080",LoggerLevel.Console);
+        } catch (UnknownHostException | SocketException e) {
             throw new RuntimeException(e);
         }
     }
