@@ -8,7 +8,6 @@ import ru.raticate.portreader.DBConnection.DatabaseWriter;
 import ru.raticate.portreader.Loggers.Logger;
 import ru.raticate.portreader.Reader.Reader;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
