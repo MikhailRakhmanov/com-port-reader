@@ -11,10 +11,6 @@ import ru.raticate.portreader.Reader.ComPortReader;
 import ru.raticate.portreader.Reader.KeyboardReader;
 import ru.raticate.portreader.Reader.Reader;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 @Configuration
 public class Config {
 

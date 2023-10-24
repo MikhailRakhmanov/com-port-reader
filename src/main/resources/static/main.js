@@ -1,7 +1,6 @@
 $(document).ready(
     function () {
         let currentLength = 0;
-        let box = $('.content');
         setInterval(
             function () {
                 if (currentLength !== 0) {

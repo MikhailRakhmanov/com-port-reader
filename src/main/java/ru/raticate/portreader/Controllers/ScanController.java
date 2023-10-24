@@ -32,8 +32,7 @@ public class ScanController {
     @PostMapping("/start")
     Boolean start() {
         reader.clearData();
-        Map<Integer, Set<Integer>> platform2product = new HashMap<>();
-        platform2product = reader.startRead();
+        Map<Integer, Set<Integer>> platform2product = reader.startRead();
         if (!platform2product.isEmpty())
             databaseWriter.sendQuery(platform2product);
         return true;
