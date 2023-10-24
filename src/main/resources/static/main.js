@@ -13,9 +13,9 @@ $(document).ready(
                         let field = $('.content');
                         field.text("");
                         Object.keys(data).forEach(key => {
-                            let resultsStr = `<tr id="${key}"><td>${key}</td>`
+                            let resultsStr = `<tr id="${key}"><td><b>${key}</b></td>`
                             data[key].forEach(el => resultsStr += (`<td>${el}</td>`))
-                            resultsStr+=(`</tr>`)
+                            resultsStr += (`</tr>`)
                             field.append(resultsStr)
 
                         })
@@ -25,16 +25,20 @@ $(document).ready(
                 $.ajax({
                     type: "GET",
                     url: "/start",
-                    success: function (data) {
-                        if (data) {
-                            $(".button").css("display", "none")
+                    success: function (isStart) {
+                        let startButton = $(".start")
+                        let barcode = $('.show-barcode')
+                        if (isStart) {
+                            startButton.css("display", "none")
+                            barcode.css("display", 'block')
                         } else {
-                            $(".button").css("display", "flex")
+                            startButton.css("display", "flex")
+                            barcode.css("display", 'none')
                         }
                     },
                     dataType: "json"
                 })
-            }, 3000)
+            }, 50)
     }
 )
 
@@ -48,6 +52,27 @@ function start() {
             },
             dataType: "json"
         });
-        $('.button').css("display", "none");
+        $('.start').css("display", "none");
     });
+}
+
+function showBarCode() {
+    if ($(".show-barcode").text() !== "Скрыть штрих код") {
+        $('.barcode').css("display", 'block');
+        $('.show-barcode').text("Скрыть штрих код")
+    }else {
+        $('.barcode').css("display", 'none');
+        $('.show-barcode').text("Показать штрих код")
+    }
+}
+
+function CallPrint(strid) {
+    let part = $(`#${strid}`)
+    let WinPrint = window.open('','','left=50,top=50,width=800,height=640,toolbar=0,scrollbars=1,status=0');
+
+    WinPrint.document.write('<link rel="stylesheet" href="/style.css">');
+    WinPrint.document.write(part.html());
+    WinPrint.document.close();
+    WinPrint.focus();
+    WinPrint.print();
 }

@@ -113,6 +113,7 @@ public class DatabaseWriter {
                 logger.log(ex.getMessage(), LoggerLevel.File);
             }
         });
+        logger.log("",LoggerLevel.File);
 
     }
 }
