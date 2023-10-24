@@ -1,6 +1,5 @@
 package ru.raticate.portreader.Controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,9 +19,7 @@ public class MainController {
 
     @GetMapping("/")
     String index(Model model) {
-
-        model.addAttribute("data", logger.data);
         model.addAttribute("barcode", barcode);
-        return "index.html";
+        return "index";
     }
 }

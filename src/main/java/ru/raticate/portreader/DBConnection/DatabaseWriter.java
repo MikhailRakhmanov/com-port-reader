@@ -49,8 +49,9 @@ public class DatabaseWriter {
         platform2product.forEach((key, value) -> {
             for (Integer integer : value) {
                 try {
-
-                    dogovorIds.add(idListHaff2idDog.get(integer).toString());
+                    Integer idDog = idListHaff2idDog.get(integer);
+                    if (idDog != null)
+                        dogovorIds.add(idDog.toString());
 
                 } catch (Exception e) {
                     logger.log(e.getMessage(), LoggerLevel.File);
@@ -82,10 +83,11 @@ public class DatabaseWriter {
 
         Set<Integer> allChangedDogs = new HashSet<>();
         Set<Integer> dogovorsWithNoChangeSOSDOG = new HashSet<>();
-        jdbcTemplate.query("select distinct c.IDDOGOVOR, a.ncar from LISTHAFF a join LISTIZD b on a.idizd = b.id join DOGOVOR c on b.iddog = c.iddogovor where c.IDDOGOVOR in (" + dogovorIds + ") AND (NCAR is not NULL and  NCAR <> 999)",
-                rs -> {
-                    dogovorsWithNoChangeSOSDOG.add(rs.getInt(1));
-                });
+        if (dogovorIds.length() != 0)
+            jdbcTemplate.query("select distinct c.IDDOGOVOR, a.ncar from LISTHAFF a join LISTIZD b on a.idizd = b.id join DOGOVOR c on b.iddog = c.iddogovor where c.IDDOGOVOR in (" + dogovorIds + ") AND (NCAR is not NULL and  NCAR <> 999)",
+                    rs -> {
+                        dogovorsWithNoChangeSOSDOG.add(rs.getInt(1));
+                    });
         logger.log("Договоры, где не проставлены все пирамиды: \n" + dogovorsWithNoChangeSOSDOG, LoggerLevel.File);
         StringJoiner resultDogovorIds = new StringJoiner(", ");
         for (Integer dogId : idListHaff2idDog.values()) {

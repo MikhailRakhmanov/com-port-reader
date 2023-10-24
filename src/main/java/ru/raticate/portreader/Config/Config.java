@@ -8,6 +8,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import ru.raticate.portreader.DBConnection.DatabaseWriter;
 import ru.raticate.portreader.Loggers.Logger;
 import ru.raticate.portreader.Reader.ComPortReader;
+import ru.raticate.portreader.Reader.KeyboardReader;
+import ru.raticate.portreader.Reader.Reader;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Configuration
 public class Config {
@@ -18,8 +24,10 @@ public class Config {
     @Autowired
     public Config(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-
     }
+
+    @Value("${reader.type}")
+    String readerType;
 
     @Value("${reader.com}")
     Integer com;
@@ -28,9 +36,10 @@ public class Config {
     String exitBarcode;
 
     @Bean
-    String exitBarcode(){
+    String exitBarcode() {
         return exitBarcode;
     }
+
     @Bean
     DatabaseWriter databaseWriter() {
         return new DatabaseWriter(logger(), jdbcTemplate);
@@ -42,7 +51,15 @@ public class Config {
     }
 
     @Bean
-    ComPortReader comPortReader() {
-        return new ComPortReader(logger(), com);
+    Reader reader() {
+        if (readerType.equals("keyboardReader")) {
+            return new KeyboardReader(logger(), exitBarcode());
+        }
+        if (readerType.equals("comPortReader")) {
+            return new ComPortReader(logger(), com, exitBarcode());
+        }
+        return new KeyboardReader(logger(), exitBarcode());
     }
+
+
 }

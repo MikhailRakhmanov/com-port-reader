@@ -1,4 +1,6 @@
 reader:
+  #type: keyboardReader or comPortReader
+  type : keyboardReader
   com : 1
   exit-barcode : quit
 spring:
@@ -9,6 +11,8 @@ spring:
   main:
     allow-bean-definition-overriding : true
     banner-mode: off
-logging:
-  level:
-    root: off
+#logging:
+#  level:
+#    root: off
+server:
+  port: 80

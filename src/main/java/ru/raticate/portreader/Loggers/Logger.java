@@ -12,10 +12,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class Logger {
 
     public List<String> data;
+
     private final FileWriter fileWriter;
 
     public Logger() {
@@ -35,7 +37,7 @@ public class Logger {
         }
         try(final DatagramSocket socket = new DatagramSocket()){
             socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
-            this.log(socket.getLocalAddress().getHostAddress()+":8080",LoggerLevel.Console);
+            this.log(socket.getLocalAddress().getHostAddress(),LoggerLevel.Console);
         } catch (UnknownHostException | SocketException e) {
             throw new RuntimeException(e);
         }

@@ -1,4 +1,3 @@
-const ip = "192.168.1.146";
 $(document).ready(
     function () {
         let currentLength = 0;
@@ -12,18 +11,31 @@ $(document).ready(
                     type: "GET",
                     url: "/data",
                     success: function (data) {
-                        console.log(data.length)
-                        if (currentLength !== data.length) {
-                            box.text('')
-                            data.forEach(e => {
-                                box.append(e + '<br>')
-                            })
-                            currentLength = data.length
+                        let field = $('.content');
+                        field.text("");
+                        Object.keys(data).forEach(key => {
+                            let resultsStr = `<tr id="${key}"><td>${key}</td>`
+                            data[key].forEach(el => resultsStr += (`<td>${el}</td>`))
+                            resultsStr+=(`</tr>`)
+                            field.append(resultsStr)
+
+                        })
+                    },
+                    dataType: "json"
+                })
+                $.ajax({
+                    type: "GET",
+                    url: "/start",
+                    success: function (data) {
+                        if (data) {
+                            $(".button").css("display", "none")
+                        } else {
+                            $(".button").css("display", "flex")
                         }
                     },
                     dataType: "json"
                 })
-            }, 1)
+            }, 3000)
     }
 )
 
