@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.raticate.portreader.DBConnection.DatabaseWriter;
+import ru.raticate.portreader.DBConnection.SPDataBaseWriter;
 import ru.raticate.portreader.Loggers.Logger;
 import ru.raticate.portreader.Reader.ComPortReader;
 import ru.raticate.portreader.Reader.KeyboardReader;
@@ -39,6 +40,10 @@ public class Config {
     @Bean
     DatabaseWriter databaseWriter() {
         return new DatabaseWriter(logger(), jdbcTemplate);
+    }
+    @Bean
+    SPDataBaseWriter spDBWriter() {
+        return new SPDataBaseWriter(jdbcTemplate, logger());
     }
 
     @Bean

@@ -10,22 +10,11 @@ import java.time.Month;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class DatabaseWriter {
-    private final long date;
-    private final Logger logger;
-    private final JdbcTemplate jdbcTemplate;
+public class DatabaseWriter extends DBWriter{
+
 
     public DatabaseWriter(Logger logger, JdbcTemplate jdbcTemplate) {
-
-        this.logger = logger;
-
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime then = LocalDateTime.of(1900, Month.JANUARY, 1, 0, 0, 0, 0);
-        Duration duration = Duration.between(then, now);
-        date = duration.toDays() + 2;
-
-        this.jdbcTemplate = jdbcTemplate;
-
+        super(logger, jdbcTemplate);
     }
 
     public void sendQuery(Map<Integer, Set<Integer>> platform2product) {

@@ -13,13 +13,13 @@ public abstract class Reader {
 
     public Map<Integer, Set<Integer>> platform2product = new TreeMap<>(Comparator.naturalOrder());
 
-    protected Reader(Logger logger,String exitBarcode) {
+    protected Reader(Logger logger, String exitBarcode) {
         this.logger = logger;
         this.exitBarcode = exitBarcode;
     }
 
     public Map<Integer, Set<Integer>> startRead() {
-        isRead =true;
+        isRead = true;
 
         Integer currentPlatform = null;
         String value;
@@ -31,7 +31,7 @@ public abstract class Reader {
             if (value == null) {
                 continue;
             }
-            if (value.equals(exitBarcode)){
+            if (value.equals(exitBarcode)) {
                 System.out.println("end");
                 break;
             }
@@ -42,12 +42,12 @@ public abstract class Reader {
                 integerValue = null;
             }
             if (integerValue != null)
-                if (100000000 < integerValue && integerValue < 100000100) {
-                    currentPlatform = integerValue % 100;
+                if (0 <= integerValue && integerValue <= 215) {
+                    currentPlatform = integerValue;
                     logger.log("Выбрана пирамида №" + currentPlatform, LoggerLevel.File, LoggerLevel.Browser, LoggerLevel.Console);
                 } else if (currentPlatform != null) {
                     final Integer[] platformToRemove = {null};
-                    int num = integerValue / 1000;
+                    int num = integerValue;
                     platform2product.forEach((key, value1) -> {
                         value1.remove(num);
                         if (value1.isEmpty()) {
@@ -58,10 +58,10 @@ public abstract class Reader {
                         platform2product.remove(platformToRemove[0]);
                     }
                     if (platform2product.containsKey(currentPlatform)) {
-                        platform2product.get(currentPlatform).add(integerValue / 1000);
+                        platform2product.get(currentPlatform).add(integerValue);
                     } else {
                         Set<Integer> set = new TreeSet<>(Comparator.naturalOrder());
-                        set.add(integerValue / 1000);
+                        set.add(integerValue);
                         platform2product.put(currentPlatform, set);
                     }
                     logger.log(value + ": " + currentPlatform, LoggerLevel.Browser, LoggerLevel.File, LoggerLevel.Console);
@@ -74,7 +74,7 @@ public abstract class Reader {
         platform2product.values().forEach(e -> e.forEach(o -> sum.getAndIncrement()));
         String resultInfo = "Отсканированно: " + sum.get() + " изделий.";
         logger.log(resultInfo, LoggerLevel.File, LoggerLevel.Browser, LoggerLevel.Console);
-        isRead=false;
+        isRead = false;
         return platform2product;
     }
 
