@@ -1,69 +1,75 @@
 package ru.raticate.portreader.DBConnection;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javafx.util.Pair;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
 import ru.raticate.portreader.Loggers.Logger;
+import ru.raticate.portreader.Loggers.LoggerLevel;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.Month;
+import java.util.Map;
+import java.util.Set;
 
 
-public class SPDataBaseWriter {
-
+public class SPDataBaseWriter extends DBWriter {
     record Platform(Integer num, Integer sosPir) {
     }
 
 
-    double date;
-    JdbcTemplate jdbcTemplate;
-    Logger logger;
-
-    @Autowired
-    public SPDataBaseWriter(JdbcTemplate jdbcTemplate,Logger logger) {
-        this.logger = logger;
-        this.jdbcTemplate = jdbcTemplate;
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime then = LocalDateTime.of(1900, Month.JANUARY, 1, 0, 0, 0, 0);
-        Duration duration = Duration.between(then, now);
-        date = (double) duration.toSeconds()/86400;
-        System.out.println(date);
+    public SPDataBaseWriter(JdbcTemplate jdbcTemplate, Logger logger) {
+        super(jdbcTemplate, logger);
     }
 
-    public void sendQuery(Integer platformId, Integer product) {
+    @Override
+    public void sendQuery(Map<Integer, Set<Integer>> platform2product) {
+        return;
+    }
 
-        Platform platform = null;
+    public void sendQuery(Pair<Integer, Integer> platformAndProduct) {
+        Integer platformId = platformAndProduct.getKey();
+        Integer product = platformAndProduct.getValue();
+        Platform platform;
         if (platformId == null) {
             return;
         }
-
-        if (platformId <= 215 || platformId == 666) {
+        try {
             platform = jdbcTemplate.queryForObject("SELECT * FROM TPIR WHERE NUM = ?", new DataClassRowMapper<>(Platform.class), platformId);
-
-            if ((platform != null ? platform.sosPir : null) == null) {
-                assert platform != null;
-                jdbcTemplate.update("insert into TPIR(NUM,SOSPIR) values (?,1)", platformId);
-                jdbcTemplate.update("insert into tpirlist(NUM,DT,CLIENT) values (?,?,970)", platform.num, date);
-            } else if (platform.sosPir != 1) {
-                jdbcTemplate.update("update TPIR set sospir = 1 where NUM = ?", platform.num);
-                jdbcTemplate.update("insert into tpirlist(NUM,DT,CLIENT) values (?,?,970)", platform.num, date);
-            }
-        } else if (product == 99999994) {
-//            npir = jdbcTemplate.queryForObject("select  from V0859_1_c1(?) order by mark", (rs, rowNum) -> {}, platformId);
-        } else if (product == 99999995) {
+        } catch (EmptyResultDataAccessException ex) {
+            logger.log("В таблице TPIR нет пирамиды " + platformId, LoggerLevel.Console, LoggerLevel.Browser);
+            jdbcTemplate.update("insert into TPIR(NUM,SOSPIR) values (?,1)", platformId);
+            jdbcTemplate.update("insert into tpirlist(NUM,DT,CLIENT) values (?,?,970)", platformId, date);
+            platform = jdbcTemplate.queryForObject("SELECT * FROM TPIR WHERE NUM = ?", new DataClassRowMapper<>(Platform.class), platformId);
+            logger.log("Пирамида была создана" + platformId, LoggerLevel.Console, LoggerLevel.Browser);
+        }
+        if (platform.sosPir != 1) {
+            logger.log("Состояние пирамиды поменяли на 1: " + platformId, LoggerLevel.Console, LoggerLevel.Browser);
+            jdbcTemplate.update("update TPIR set sospir = 1 where NUM = ?", platform.num);
+            jdbcTemplate.update("insert into tpirlist(NUM,DT,CLIENT) values (?,?,970)", platform.num, date);
+        }
+        if (product == 99999995) {
+            jdbcTemplate.update("insert into tpirlist(NUM,DT,CLIENT) values (?,?,970)", platformId, date);
+            jdbcTemplate.update("update tpir set sospir=1 where num=?", platformId);
         } else if (product == 99999996) {
+            jdbcTemplate.update("execute procedure v0382_6(?)", platformId);
+
         } else {
-
-            Integer barcode = jdbcTemplate.queryForObject("select BARCODE from ZMATLIST WHERE BARCODE = ?", Integer.class, product);
-            if (barcode == null) {
-                barcode = jdbcTemplate.queryForObject("select ZMATLIST.barcode as barcode from listizd, zmatlist  where LISTIZD.id=ZMATLIST.idizd and ZMATLIST.maked is null and LISTIZD.np=?", Integer.class, product);
+            Integer barcode = null;
+            try {
+                barcode = jdbcTemplate.queryForObject("select BARCODE from ZMATLIST WHERE BARCODE = ?", Integer.class, product);
+            } catch (Exception ex) {
+                System.out.println("Штрих кода " + barcode + " нет в ZMATLIST.");
             }
-            jdbcTemplate.update("update ZMATLIST set TRUCK = ?,DTPIR = ? where BARCODE = ?", platformId, date, product);
-
+            System.out.println("Штрих из таблицы: "+barcode);
+            if (barcode == null) {
+                try {
+                    barcode = jdbcTemplate.queryForObject("select ZMATLIST.barcode as barcode from listizd, zmatlist  where LISTIZD.id=ZMATLIST.idizd and ZMATLIST.maked is null and LISTIZD.np=?", Integer.class, product);
+                    System.out.println("Штрих из таблицы: "+barcode);
+                } catch (Exception ex) {
+                    System.out.println("Штрих кода " + barcode + " нет в ZMATLIST.");
+                }
+            }
+            jdbcTemplate.update("update ZMATLIST set TRUCK = ?,DTPIR = ? where BARCODE = ?", platformId, date, barcode);
         }
     }
-
 }
 

@@ -15,12 +15,10 @@ import java.util.List;
 
 public class Logger {
 
-    public List<String> data;
 
     private final FileWriter fileWriter;
 
     public Logger() {
-        data = new ArrayList<>();
         File file = new File("history.txt");
         if (!file.exists()) try {
             assert true :
@@ -43,8 +41,7 @@ public class Logger {
     }
 
     public void log(String str, LoggerLevel... loggerLevels) {
-        if (Arrays.asList(loggerLevels).contains(LoggerLevel.Browser))
-            data.add(str);
+
         if (Arrays.asList(loggerLevels).contains(LoggerLevel.File))
             try {
                 fileWriter.write(str + '\n');

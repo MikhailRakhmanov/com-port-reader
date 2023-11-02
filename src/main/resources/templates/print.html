@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Printing</title>
+    <style>
+        * {
+            margin-bottom: 10px;
+            font-family: Arial, serif;
+            font-size: 16px;
+        }
+
+        tr, th, td {
+            border: 2px solid black;
+            border-collapse: collapse;
+        }
+
+
+        td {
+            padding: 5px;
+        }
+
+        .main {
+            width: 95vw;
+        }
+        .result {
+            width: 35vw;
+        }
+
+
+        table, tr, td {
+            border: 1px solid black;
+            border-spacing: 0px;
+            border-collapse: collapse;
+        }
+
+        table {
+            counter-reset: rowNumber;
+        }
+
+        .table::before {
+            padding: 5px;
+            display: table-cell;
+            counter-increment: rowNumber;
+            content: counter(rowNumber) ".";
+        }
+    </style>
+</head>
+<body th:if="${platform!=null}">
+<table class="main" style="width: 95vw">
+    <caption><h1 th:text='|Пирамида №${platform}|'></h1></caption>
+    <tr>
+        <td>ID</td>
+        <td>Наименование</td>
+        <td>Маркировка</td>
+        <td>№ договора</td>
+        <td>Заказчик</td>
+        <td>Размер</td>
+        <td>Площадь</td>
+        <td>Начало</td>
+        <td>Конец</td>
+    </tr>
+    <tr th:each="string: ${data}" class="table">
+        <td th:text="${string.CAPTION()}"></td>
+        <td th:text="${string.MARK()}"></td>
+        <td th:text="${string.NUMDOG()}"></td>
+        <td th:text="${string.CLIENT()}"></td>
+        <td th:text="${string.RAZ()}"></td>
+        <td th:text="${string.SM()}"></td>
+        <td th:if="${string.DTS() != null}" th:text="${convertor.doubleToStr(string.DTS())}"></td>
+        <td th:if="${string.DTF() != null}" th:text="${convertor.doubleToStr(string.DTF())}"></td>
+    </tr>
+
+</table>
+<hr>
+<table class="result">
+    <tr>
+        <td><b th:text="Количество"></b></td>
+        <td><b th:text="Площадь"></b></td>
+
+
+    </tr>
+    <tr>
+        <td th:text="${count}"></td>
+        <td th:text="${area}"></td>
+    </tr>
+</table>
+</body>
+</html>

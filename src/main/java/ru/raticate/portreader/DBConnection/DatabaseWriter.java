@@ -1,5 +1,6 @@
 package ru.raticate.portreader.DBConnection;
 
+import javafx.util.Pair;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.raticate.portreader.Loggers.Logger;
 import ru.raticate.portreader.Loggers.LoggerLevel;
@@ -7,11 +8,11 @@ import ru.raticate.portreader.Loggers.LoggerLevel;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class DatabaseWriter extends DBWriter{
+public class DatabaseWriter extends DBWriter {
 
 
-    public DatabaseWriter(Logger logger, JdbcTemplate jdbcTemplate) {
-        super(logger, jdbcTemplate);
+    public DatabaseWriter(JdbcTemplate jdbcTemplate, Logger logger) {
+        super(jdbcTemplate, logger);
     }
 
     public void sendQuery(Map<Integer, Set<Integer>> platform2product) {
@@ -99,7 +100,12 @@ public class DatabaseWriter extends DBWriter{
                 logger.log(ex.getMessage(), LoggerLevel.File);
             }
         });
-        logger.log("",LoggerLevel.File);
+        logger.log("", LoggerLevel.File);
 
+    }
+
+    @Override
+    public void sendQuery(Pair<Integer, Integer> platformAndProduct) {
+        return;
     }
 }

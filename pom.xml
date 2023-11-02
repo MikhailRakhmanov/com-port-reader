@@ -10,7 +10,7 @@
     </parent>
     <groupId>ru.raticate</groupId>
     <artifactId>PortReader</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0</version>
     <name>PortReader</name>
     <description>PortReader</description>
     <properties>
@@ -52,6 +52,12 @@
             <groupId>org.firebirdsql.jdbc</groupId>
             <artifactId>jaybird</artifactId>
             <version>5.0.2.java11</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-base</artifactId>
+            <version>17.0.6</version>
         </dependency>
 
     </dependencies>

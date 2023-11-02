@@ -13,12 +13,10 @@ import java.util.List;
 
 public class ComPortReader extends Reader {
     BufferedReader bufferedReader;
-    Logger logger;
 
 
     public ComPortReader(Logger logger, Integer com, String exitBarcode) {
         super(logger, exitBarcode);
-        this.exitBarcode = exitBarcode;
         List<SerialPort> ports = new ArrayList<>(Arrays.stream(SerialPort.getCommPorts()).toList());
         for (int i = 0; i < ports.size(); i++) {
             SerialPort serialPort = ports.get(i);
@@ -35,12 +33,23 @@ public class ComPortReader extends Reader {
 
     @Override
     public String getValue() {
+        String value = null;
         try {
-            return bufferedReader.readLine();
+            value = bufferedReader.readLine();
+            if (value.equalsIgnoreCase(exitBarcode)) {
+                return null;
+            } else {
+                return value;
+            }
         } catch (IOException e) {
-            logger.log("Ошибка чтения COM-port", LoggerLevel.Console,LoggerLevel.File,LoggerLevel.Browser);
+            logger.log("Ошибка чтения COM-port", LoggerLevel.Console);
         }
         return null;
+    }
+
+    public static void main(String[] args) {
+        ComPortReader comPortReader = new ComPortReader(new Logger(), 1, "123");
+        System.out.println(comPortReader.getValue());
     }
 
 

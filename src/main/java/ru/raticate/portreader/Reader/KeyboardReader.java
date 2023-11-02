@@ -15,7 +15,10 @@ public class KeyboardReader extends Reader {
     public String getValue() {
         try {
             String value = bufferedReader.nextLine();
-            return value.length() == 9 || value.equals(exitBarcode) ? value : null;
+            if(value.equalsIgnoreCase(exitBarcode)){
+                return null;
+            }
+            return value;
         } catch (Exception e) {
             return null;
         }
