@@ -2,9 +2,11 @@ package ru.raticate.portreader.DBConnection;
 
 import javafx.util.Pair;
 import org.springframework.jdbc.core.JdbcTemplate;
+import ru.raticate.portreader.DateConvertor;
 import ru.raticate.portreader.Loggers.Logger;
 import ru.raticate.portreader.Loggers.LoggerLevel;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -16,6 +18,7 @@ public class DatabaseWriter extends DBWriter {
     }
 
     public void sendQuery(Map<Integer, Set<Integer>> platform2product) {
+        DateConvertor convertor = new DateConvertor();
 
         Map<Integer, Integer> idListHaff2idDog = new TreeMap<>();
         StringBuilder updateStateOfDog = new StringBuilder("update DOGOVOR set SOSDOG = 4 where IDDOGOVOR in (");
@@ -46,7 +49,7 @@ public class DatabaseWriter extends DBWriter {
             }
         });
 
-        String secondQuery = "update LISTHAFF set DOTINSKLPOV = " + date + " where IDLISTHAFF in (" + listHaffIds + ");";
+        String secondQuery = "update LISTHAFF set DOTINSKLPOV = " + convertor.dateToDouble(LocalDateTime.now()) + " where IDLISTHAFF in (" + listHaffIds + ");";
         logger.log(secondQuery, LoggerLevel.File);
         jdbcTemplate.execute(secondQuery);
 
@@ -93,7 +96,7 @@ public class DatabaseWriter extends DBWriter {
 
         allChangedDogs.forEach(s -> {
             try {
-                String tabel = "insert into TBL_OPER(IDUSER,IDDOG,DT,OPER) values (0, ".concat(s.toString()).concat(", ").concat(String.valueOf(date)).concat(", 9);");
+                String tabel = "insert into TBL_OPER(IDUSER,IDDOG,DT,OPER) values (0, ".concat(s.toString()).concat(", ").concat(String.valueOf(convertor.dateToDouble(LocalDateTime.now()))).concat(", 9);");
                 logger.log(tabel, LoggerLevel.File);
                 jdbcTemplate.execute(tabel);
             } catch (Exception ex) {
@@ -106,6 +109,5 @@ public class DatabaseWriter extends DBWriter {
 
     @Override
     public void sendQuery(Pair<Integer, Integer> platformAndProduct) {
-        return;
     }
 }

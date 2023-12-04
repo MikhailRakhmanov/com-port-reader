@@ -1,16 +1,18 @@
 $(document).ready(
     function () {
-        let currentLength = 0;
         setInterval(
             function () {
-                if (currentLength !== 0) {
-                    $('.button').css("display", "none");
-                }
                 $.ajax({
                     type: "GET",
-                    url: "/table",
+                    url: "/scan/cur_id",
                     success: function (data) {
-
+                        $('.list_info').text(`Лист на пирамиду ${data.toString()}`)
+                    }
+                })
+                $.ajax({
+                    type: "GET",
+                    url: "/scan/table",
+                    success: function (data) {
                         let field = $('.content');
                         field.text("");
                         field.append(" <tr>\n" +
@@ -42,30 +44,23 @@ $(document).ready(
                     },
                     dataType: "json"
                 })
-                $.ajax({
-                    type: "GET",
-                    url: "/platform",
-                    success: function (data) {
 
-                        $('caption').text(`Лист на пирамиду ${data}`)
-                    }
-                })
+
 
                 let res_info1 = $(`.result-data1`)
                 let res_info2 = $(`.result-data2`)
                 $.ajax({
                     type: "GET",
-                    url: "/area",
+                    url: "/scan/area",
                     success: function (data) {
                         res_info1.text("")
                         res_info1.append(`Площадь = ${data} м<sup>2</sup><br>`)
                     }
                 })
 
-
                 $.ajax({
                     type: "GET",
-                    url: "/count",
+                    url: "/scan/count",
                     success: function (data) {
                         res_info2.text("")
                         res_info2.append(`Количество = ${data}<br>`)
@@ -74,13 +69,13 @@ $(document).ready(
 
                 $.ajax({
                     type: "GET",
-                    url: "/start",
+                    url: "/scan/start",
                     success: function (isStart) {
                         let startButton = $(".start")
                         let barcode = $('.show-barcode')
                         if (isStart) {
 
-                            $(`.hidden-at-start`).css("display","block")
+                            $(`#hidden-at-start`).css("display","block")
                             startButton.css("display", "none")
                             barcode.css("display", 'block')
                         } else {
@@ -100,7 +95,7 @@ function start() {
     $(document).ready(function () {
         $.ajax({
             type: "POST",
-            url: "/start",
+            url: "scan/start",
             data: ` `,
             success: function (result) {
             },
@@ -110,35 +105,4 @@ function start() {
         $(`.hidden-at-start`).css("display","block")
         $('.start').css("display", "none");
     });
-}
-
-function showBarCode() {
-    if ($(".show-barcode").text() !== "Скрыть штрих код") {
-        $('.barcode').css("display", 'block');
-        $('.show-barcode').text("Скрыть штрих код")
-    } else {
-        $('.barcode').css("display", 'none');
-        $('.show-barcode').text("Показать штрих код")
-    }
-}
-
-function CallPrint(strid) {
-    let part = $(`#${strid}`)
-    let WinPrint = window.open('', '', 'left=50,top=50,width=800,height=640,toolbar=0,scrollbars=1,status=0');
-
-    WinPrint.document.write(`<style>
-        table,tr,td {
-        border: 1px solid black;
-        border-spacing: 0px;
-        border-collapse: collapse;
-    }
-    table{
-        width: 95vw;
-    }
-    </style>`);
-    WinPrint.document.write(part.html());
-    WinPrint.document.close();
-    WinPrint.focus();
-    WinPrint.print();
-    WinPrint.close();
 }

@@ -27,6 +27,16 @@ public class ComPortReader extends Reader {
         SerialPort serialPort = ports.get(com);
         serialPort.setComPortParameters(9600, 8, 1, SerialPort.NO_PARITY);
         serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, Integer.MAX_VALUE, 0);
+        System.out.println(serialPort.getCTS());
+        System.out.println(serialPort.getPortLocation());
+        System.out.println(serialPort.getDCD());
+        System.out.println(serialPort.getDSR());
+        System.out.println(serialPort.getCTS());
+        System.out.println(serialPort.getDeviceReadBufferSize());
+        System.out.println(serialPort.getRTS());
+        System.out.println(serialPort.getRI());
+        System.out.println(serialPort.getSerialNumber());
+
         bufferedReader = new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
     }
 

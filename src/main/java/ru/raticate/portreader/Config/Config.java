@@ -71,6 +71,4 @@ public class Config {
         }
         return new KeyboardReader(logger(), exitBarcode());
     }
-
-
 }

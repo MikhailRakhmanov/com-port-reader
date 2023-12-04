@@ -5,7 +5,6 @@ reader:
 #  type : comPortReader
   com: 0
   exit-barcode: quit
-
   main:
     allow-bean-definition-overriding: true
     banner-mode: off
