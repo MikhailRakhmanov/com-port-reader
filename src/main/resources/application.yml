@@ -10,7 +10,7 @@ reader:
     banner-mode: off
 
 server:
-  port: 80
+  port: 8080
 
 #logging:
 #  level:
@@ -23,9 +23,14 @@ server:
 
 spring:
   datasource:
-    url: "jdbc:firebirdsql://192.168.1.244:3050/c:/OK/22.fdb"
-    password: masterkey
-    username: SYSDBA
+    main:
+      url: "jdbc:firebirdsql://192.168.1.93:3050/C:/Program Files (x86)/Firebird/BASEPLAST_05012024.FDB"
+      password: masterkey
+      username: SYSDBA
+    sp:
+      url: "jdbc:firebirdsql://192.168.1.244:3050/c:/OK/22.fdb"
+      password: masterkey
+      username: SYSDBA
 #  jpa:
 #    properties:
 #      hibernate:

@@ -1,6 +1,6 @@
 package ru.raticate.portreader.Controllers.DTO;
 
-public class Data {
+public class PairDTO {
     private Integer platform,product;
 
     public Integer getProduct() {
@@ -19,7 +19,7 @@ public class Data {
         this.platform = platform;
     }
 
-    Data(Integer platform, Integer product) {
+    PairDTO(Integer platform, Integer product) {
         this.platform = platform;
         this.product = product;
     }

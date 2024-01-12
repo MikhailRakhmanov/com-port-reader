@@ -5,8 +5,6 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.raticate.portreader.DateConvertor;
-import ru.raticate.portreader.Loggers.Logger;
-import ru.raticate.portreader.Loggers.LoggerLevel;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -19,8 +17,8 @@ public class SPDataBaseWriter extends DBWriter {
     }
 
 
-    public SPDataBaseWriter(JdbcTemplate jdbcTemplate, Logger logger) {
-        super(jdbcTemplate, logger);
+    public SPDataBaseWriter(JdbcTemplate jdbcTemplate) {
+        super(jdbcTemplate);
     }
 
     @Override
@@ -37,14 +35,11 @@ public class SPDataBaseWriter extends DBWriter {
         try {
             platform = jdbcTemplate.queryForObject("SELECT * FROM TPIR WHERE NUM = ?", new DataClassRowMapper<>(Platform.class), platformId);
         } catch (EmptyResultDataAccessException ex) {
-            logger.log("В таблице TPIR нет пирамиды " + platformId, LoggerLevel.Console, LoggerLevel.Browser);
             jdbcTemplate.update("insert into TPIR(NUM,SOSPIR) values (?,1)", platformId);
             jdbcTemplate.update("insert into tpirlist(NUM,DT,CLIENT) values (?,?,970)", platformId, convertor.dateToDouble(LocalDateTime.now()));
             platform = jdbcTemplate.queryForObject("SELECT * FROM TPIR WHERE NUM = ?", new DataClassRowMapper<>(Platform.class), platformId);
-            logger.log("Пирамида была создана" + platformId, LoggerLevel.Console, LoggerLevel.Browser);
-        }
+            }
         if (platform != null && platform.sosPir != 1) {
-            logger.log("Состояние пирамиды поменяли на 1: " + platformId, LoggerLevel.Console, LoggerLevel.Browser);
             jdbcTemplate.update("update TPIR set sospir = 1 where NUM = ?", platform.num);
             jdbcTemplate.update("insert into tpirlist(NUM,DT,CLIENT) values (?,?,970)", platform.num, convertor.dateToDouble(LocalDateTime.now()));
         }
