@@ -11,6 +11,9 @@ public class Product {
     Integer numDog;
     String raz;
     String client;
+    Double sm;
+    LocalDate dts;
+    LocalDate dtf;
 
     public String getCaption() {
         return caption;
@@ -76,9 +79,7 @@ public class Product {
         this.dtf = dtf;
     }
 
-    Double sm;
-    LocalDate dts;
-    LocalDate dtf;
+
 
     public Product(String caption, String mark, Integer numDog, String raz, String client, Double sm, Integer dts, Integer dtf) {
         dateConvertor = new DateConvertor();
@@ -88,8 +89,16 @@ public class Product {
         this.raz = raz;
         this.client = client;
         this.sm = sm;
-        this.dts = dateConvertor.doubleToDate(dts).toLocalDate();
-        this.dtf = dateConvertor.doubleToDate(dtf).toLocalDate();
+        try {
+            this.dts = dateConvertor.doubleToDate(dts).toLocalDate();
+        }catch (Exception ex){
+
+        }
+        try {
+            this.dtf = dateConvertor.doubleToDate(dtf).toLocalDate();
+        }catch (Exception ex){
+
+        }
     }
 
 }

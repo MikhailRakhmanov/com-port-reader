@@ -22,9 +22,11 @@
         td {
             padding: 5px;
         }
-
+        body{
+            margin: 5px;
+        }
         .main {
-            width: 95vw;
+            width: 100%;
         }
         .result {
             width: 35vw;
@@ -47,10 +49,13 @@
             counter-increment: rowNumber;
             content: counter(rowNumber) ".";
         }
+        h1 {
+            font-size: 30px;
+        }
     </style>
 </head>
 <body th:if="${platform!=null}">
-<table class="main" style="width: 95vw">
+<table class="main">
     <caption><h1 th:text='|Пирамида №${platform}|'></h1></caption>
     <tr>
         <td>ID</td>
@@ -64,14 +69,14 @@
         <td>Конец</td>
     </tr>
     <tr th:each="string: ${data}" class="table">
-        <td th:text="${string.CAPTION()}"></td>
-        <td th:text="${string.MARK()}"></td>
-        <td th:text="${string.NUMDOG()}"></td>
-        <td th:text="${string.CLIENT()}"></td>
-        <td th:text="${string.RAZ()}"></td>
-        <td th:text="${string.SM()}"></td>
-        <td th:if="${string.DTS() != null}" th:text="${convertor.doubleToStr(string.DTS())}"></td>
-        <td th:if="${string.DTF() != null}" th:text="${convertor.doubleToStr(string.DTF())}"></td>
+        <td th:text="${string.caption}"></td>
+        <td th:text="${string.mark}"></td>
+        <td th:text="${string.numDog}"></td>
+        <td th:text="${string.client}"></td>
+        <td th:text="${string.raz}"></td>
+        <td th:text="${string.sm}"></td>
+        <td th:text="${string.dts}"></td>
+        <td th:text="${string.dtf}"></td>
     </tr>
 
 </table>

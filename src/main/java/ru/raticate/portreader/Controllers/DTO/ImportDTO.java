@@ -1,6 +1,11 @@
 package ru.raticate.portreader.Controllers.DTO;
 
 
+import ru.raticate.portreader.DateConvertor;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 public class ImportDTO {
     Integer IDZMAT;
     Integer DOTPRN;
@@ -11,8 +16,8 @@ public class ImportDTO {
     String FNAME;
     Character SLC;
     Integer WDATE;
-    Integer DTP;
-    Integer DOT6;
+    LocalDateTime DTP;
+    LocalDateTime DOT6;
     Integer IDBRIG;
     Integer PARENT;
     Integer MANAGER;
@@ -91,20 +96,21 @@ public class ImportDTO {
         this.WDATE = WDATE;
     }
 
-    public Integer getDTP() {
-        return DTP;
+    public LocalDate getDTP() {
+        return DTP.toLocalDate();
     }
 
     public void setDTP(Integer DTP) {
-        this.DTP = DTP;
+        this.DTP = dateConvertor.doubleToDate(DTP);
     }
 
-    public Integer getDOT6() {
-        return DOT6;
+
+    public LocalDate getDOT6() {
+        return DOT6.toLocalDate();
     }
 
     public void setDOT6(Integer DOT6) {
-        this.DOT6 = DOT6;
+        this.DOT6 = dateConvertor.doubleToDate(DOT6);
     }
 
     public Integer getIDBRIG() {
@@ -147,5 +153,29 @@ public class ImportDTO {
         this.KOLVO = KOLVO;
     }
 
+    private static final DateConvertor  dateConvertor = new DateConvertor();
 
+    public ImportDTO(Integer IDZMAT, Integer DOTPRN, String PACKET, Integer NUM, String NOTES, String NOTES1, String FNAME, Character SLC, Integer WDATE, Integer DTP, Integer DOT6, Integer IDBRIG, Integer PARENT, Integer MANAGER, Integer VD, Integer KOLVO) {
+
+        this.IDZMAT = IDZMAT;
+        this.DOTPRN = DOTPRN;
+        this.PACKET = PACKET;
+        this.NUM = NUM;
+        this.NOTES = NOTES;
+        this.NOTES1 = NOTES1;
+        this.FNAME = FNAME;
+        this.SLC = SLC;
+        this.WDATE = WDATE;
+        if (DTP != null) {
+            this.DTP = dateConvertor.doubleToDate(DTP);
+        }
+        if (DOT6 != null) {
+            this.DOT6 = dateConvertor.doubleToDate(DOT6);
+        }
+        this.IDBRIG = IDBRIG;
+        this.PARENT = PARENT;
+        this.MANAGER = MANAGER;
+        this.VD = VD;
+        this.KOLVO = KOLVO;
+    }
 }

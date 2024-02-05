@@ -8,7 +8,7 @@ class Data:
 
 
 
-data = Data(platform=10, product=13217)
+data = Data(platform=1, product=13217)
 print(data.__dict__)
 
 response = requests.post("http://localhost:8080/api/sp_data", json=data.__dict__)

@@ -6,17 +6,17 @@ import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
-import ru.raticate.portreader.Controllers.DTO.PairDTO;
 import ru.raticate.portreader.Controllers.DTO.DeliveyDTO;
 import ru.raticate.portreader.Controllers.DTO.ImportDTO;
+import ru.raticate.portreader.Controllers.DTO.PairDTO;
 import ru.raticate.portreader.Controllers.DTO.Table.PlatformDTO;
 import ru.raticate.portreader.Controllers.DTO.Table.Product;
 import ru.raticate.portreader.DBConnection.DBWriter;
 import ru.raticate.portreader.Servises.TPIR;
 
+import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
-
-import static org.springframework.jdbc.core.JdbcOperationsExtensionsKt.query;
 
 @RestController
 @RequestMapping("/api")
@@ -64,17 +64,40 @@ public class ApiController {
     public List<TPIR> platformList() {
         return sPJdbcTemplate.query("select * from TPIR order by num", new DataClassRowMapper<>(TPIR.class));
     }
+
+
     @GetMapping("/table/{id}")
     public PlatformDTO platform(@PathVariable Integer id) {
         List<Product> products = sPJdbcTemplate.query("select * from V0859_1_c1(?) order by mark", new DataClassRowMapper<>(Product.class), id);
         int count = 0;
-        double area = 0.0;
+        Double area = 0.0;
         if (products != null) {
             count = products.size();
             area = products.stream().mapToDouble(Product::getSm).sum();
         }
-        System.out.println(products);
+        DecimalFormat df = new DecimalFormat("#.###");
+        return new PlatformDTO(products, id, count, df.format(area));
+    }
 
-        return new PlatformDTO(products, currentPlatform, count,area);
+    @GetMapping("/table/old/{id}")
+    public List<String> oldPlatformInfo(@PathVariable Integer id) {
+        Double date = sPJdbcTemplate.queryForObject("select max(dt) from tpirlist where num = ? and dotout is not null ", Double.class, id);
+        System.out.println(date);
+        return sPJdbcTemplate.query("""
+                select distinct caption
+                from dogovor
+                         left join sprenprise
+                                   on dogovor.client = sprenprise.idsprenprise
+                where iddogovor in (select distinct IDDOG
+                                    from zmatlist
+                                             left join LISTIZD
+                                                       on ZMATLIST.IDIZD = LISTIZD.ID
+                                    where DTPIR >= ?
+                                      and truck = ?
+                );
+                """,
+                (rs, rowNum) -> rs.getString("caption"),
+                date,
+                id);
     }
 }
